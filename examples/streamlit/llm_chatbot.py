@@ -51,25 +51,25 @@ messages = st.session_state.messages
 for n, msg in enumerate(messages):
     st.chat_message(msg["role"]).write(msg["content"])
 
-    if msg["role"] == "assistant" and n > 1:
-        feedback_key = f"feedback_{int(n / 2)}"
+    # if msg["role"] == "assistant" and n > 1:
+        # feedback_key = f"feedback_{int(n / 2)}"
 
-        if feedback_key not in st.session_state:
-            st.session_state[feedback_key] = None
-        feedback = collector.st_feedback(
-            component="default",
-            feedback_type="thumbs",
-            open_feedback_label="[Optional] Provide additional feedback",
-            model=model,
-            tags=tags,
-            key=feedback_key,
-            prompt_id=st.session_state.prompt_ids[int(n / 2) - 1],
-            user_id=email,
-        )
-        if feedback:
-            with st.sidebar:
-                st.write(":orange[Here's the raw feedback you sent to [Trubrics](https://trubrics.streamlit.app/):]")
-                st.write(feedback)
+        # if feedback_key not in st.session_state:
+        #     st.session_state[feedback_key] = None
+        # feedback = collector.st_feedback(
+        #     component="default",
+        #     feedback_type="thumbs",
+        #     open_feedback_label="[Optional] Provide additional feedback",
+        #     model=model,
+        #     tags=tags,
+        #     key=feedback_key,
+        #     prompt_id=st.session_state.prompt_ids[int(n / 2) - 1],
+        #     user_id=email,
+        # )
+        # if feedback:
+        #     with st.sidebar:
+        #         st.write(":orange[Here's the raw feedback you sent to [Trubrics](https://trubrics.streamlit.app/):]")
+        #         st.write(feedback)
 
 if prompt := st.chat_input("Ask your question"):
     messages.append({"role": "user", "content": prompt})
@@ -103,4 +103,13 @@ if prompt := st.chat_input("Ask your question"):
         )
         st.session_state.prompt_ids.append(logged_prompt.id)
         messages.append({"role": "assistant", "content": generation})
-        st.rerun()  # force rerun of app, to load last feedback component
+        collector.st_feedback(
+            component="default",
+            feedback_type="thumbs",
+            open_feedback_label="[Optional] Provide additional feedback",
+            model=model,
+            tags=tags,
+            prompt_id=logged_prompt.id,
+            user_id=email,
+        )
+        # st.rerun()  # force rerun of app, to load last feedback component
